@@ -1,0 +1,25 @@
+#!groovy
+pipeline {
+    agent any
+    stages {           
+        stage('Docker Build') {
+            agent any
+                steps {
+                    sh 'docker build -t abdelrahman1111/start-with-docker:nodeapp -f dockerfile .'}
+                }
+        stage('Docker Push') {
+            agent any
+                steps {
+                    withCredentials([usernamePassword(credentialsId: 'hamada', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+                        sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
+                        sh 'docker push abdelrahman1111/start-with-docker:nodeapp'
+        }
+                }
+        stage('Docker run') {
+            agent any
+                steps {
+                    sh 'docker run -p 3000:3000 abdelrahman1111/start-with-docker:nodeapp' }
+            }
+        }
+    }
+}
